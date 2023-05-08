@@ -1,0 +1,38 @@
+class Szorp:
+    l = 0.0
+    nev = ""
+    ar = 0
+    def __init__(self, sor):
+        seged = sor.split(';')
+        self.l = float(seged[0])
+        self.nev = seged[1]
+        self.ar = int(seged[2])
+be = open("adatok.txt", encoding="UTF-8")
+raktar = []
+for sor in be:
+    raktar.append(Szorp(sor))
+print(f"A raktáron {len(raktar)} fajta szörp található.")
+maximum = raktar[0]
+#print(raktar[0].l)
+for i in raktar:
+    if maximum.l < i.l:
+        maximum = i
+print(f" A legtöbb szörp a(z) {maximum.nev}, meghozza {maximum.l} liter.")
+osszes_ar = 0
+for i in raktar:
+    osszes_ar +=i.ar
+print(f"Az átlagár {(round(osszes_ar/len(raktar)))} Forint.")
+print(osszes_ar)
+
+l_osszeg = 0
+for szorp in raktar:
+    l_osszeg += (szorp.l * szorp.ar)
+print(f"A teljes készletérték {round(l_osszeg/1000000,2)} millió forint.")
+
+atlag_feletti_szorpok = []
+for szorp in raktar:
+    if szorp.ar > ((osszes_ar/len(raktar))):
+        atlag_feletti_szorpok.append(szorp)
+print(f"Átlag feletti termékek:")
+for szorp in atlag_feletti_szorpok:
+    print(f"{szorp.ar} Ft  -  {szorp.nev}")
