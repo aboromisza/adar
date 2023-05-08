@@ -1,0 +1,18 @@
+class Italok:
+    def __init__(self, a, b, c):
+        self.liter = a
+        self.nev = b
+        self.ar = c
+
+
+raktar = []
+file = open("adatok.txt", encoding="utf-8")
+for sor in file:
+    seged = sor.strip().split(";")
+    a = seged[0]
+    b = seged[1]
+    c = seged[2]
+    raktar.append(Italok(a, b, c))
+
+for i in raktar:
+    print(i.nev, i.ar)
