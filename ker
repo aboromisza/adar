@@ -1,0 +1,37 @@
+def paros_db(lista):
+    db = 0
+    for i in lista:
+        if i % 2 == 0:
+            db += 1
+    return db
+
+def legkisebb_ertek(lista):
+    legkisebb = lista[0]
+    for i in lista:
+        if i < legkisebb:
+            legkisebb = i
+    return legkisebb
+
+def legnagyobb_ertek(lista):
+    legnagyobb = lista[0]
+    for i in lista:
+        if i > legnagyobb:
+            legnagyobb = i
+    return legnagyobb
+
+def legkisebb_helye(lista):
+    index = 0
+    while index < len(lista) and lista[index] != legkisebb_ertek(lista):
+        index += 1
+    van = index < len(lista)
+    if van:
+        return index
+    else:
+        return -1
+
+def legkisebb_helye2(lista):
+    index = 0
+    while index < len(lista) and lista[index] != legkisebb_ertek(lista):
+        index +=1
+    van = index < len(lista)
+    return index if van else return -1
