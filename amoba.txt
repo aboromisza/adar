@@ -1,0 +1,291 @@
+
+     <Grid.RowDefinitions>
+         <RowDefinition Height="Auto"/>
+         <RowDefinition Height="Auto"/>
+         <RowDefinition Height="*"/>
+         <RowDefinition Height="Auto"/>
+         <RowDefinition Height="Auto"/>
+     </Grid.RowDefinitions>
+     <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="2*"/>
+     </Grid.ColumnDefinitions>
+
+     <Label Grid.Row="0" Grid.Column="0" Content="1.Játékos (X)" HorizontalContentAlignment="Center" Margin="5"/>
+     <Label Grid.Row="1" Grid.Column="0" Content="2.Játékos (O)" HorizontalContentAlignment="Center" Margin="5"/>
+     <TextBox Grid.Row="0" Grid.Column="1" x:Name="Player1" Margin="5"/>
+     <TextBox Grid.Row="1" Grid.Column="1" x:Name="Player2" Margin="5"/>
+     <UniformGrid
+         Grid.Row="2"
+         Grid.ColumnSpan="2"
+         Name="Board"
+         Margin="7"
+         />
+
+     <Label Grid.Row="3" Grid.Column="0" Content="Fájlnév" HorizontalContentAlignment="Center" Margin="5"/>
+     <TextBox Grid.Row="3" Grid.Column="1" x:Name="BTName" Margin="5"/>
+     <Button Grid.Row="4" Grid.ColumnSpan="2" Content="Mentés" Click="Save_Click" Margin="5"/>
+
+
+ </Grid>
+
+public partial class MainWindow : Window
+{
+    private Button[,] buttons = new Button[4, 4];
+    private bool IsNextX = true;
+    public MainWindow()
+    {
+        InitializeComponent();
+        CreateButtonGrid();
+        Player1.Text = "Józsi";
+        Player2.Text = "Karesz";
+        BTName.Text = "minta.txt";
+    }
+
+    private void CreateButtonGrid()
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            for (int col = 0; col < 4; col++)
+            {
+                Button button = new Button { FontSize = 32 };
+                button.Click += Button_Click;
+                Board.Children.Add(button);
+                buttons[row, col] = button;
+
+            }
+        }
+    }
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+       if (sender is Button button)
+        {
+            if (string.IsNullOrEmpty(button.Content as string)) 
+            {
+                button.Content = IsNextX ? "X" : "O";
+                IsNextX = !IsNextX;
+            }
+        }
+    }
+
+    private void Save_Click(object sender, RoutedEventArgs e)
+    {
+       if (string.IsNullOrWhiteSpace(Player1.Text) ||
+            string.IsNullOrWhiteSpace(Player2.Text) ||
+            string.IsNullOrWhiteSpace(BTName.Text)
+            )
+        {
+            MessageBox.Show("Kitöltetlne adat", "Töltsd ki az összes mezőt", MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+       string filePath = BTName.Text;
+        using (StreamWriter file = new StreamWriter(filePath))
+        {
+            file.WriteLine(Player1.Text + ";" + Player2.Text);
+            for (int row = 0; row < 4; row++)
+            {
+                for (int col = 0; col < 4; col++)
+                {
+                    string content = buttons[row, col].Content as string;
+                    file.Write(string.IsNullOrEmpty(content) ? "_" : content);
+                    if (col < 3) file.Write(";");
+
+                }
+                file.WriteLine();
+            }
+        }
+
+        MessageBox.Show("Elmentve " + filePath + " néven");
+
+        foreach(Button button in buttons)
+        {
+            button.Content = "";
+        }
+    }
+}
+
+namespace Amoba3_gyak
+{
+    internal class AmobaJatek
+    {
+        public string Jatekos1, Jatekos2;
+        public string[,] jatekTabla;
+
+        public AmobaJatek(string [] jatekosok, string[,] jatekTabla)
+        {
+            Jatekos1 = jatekosok[0];
+            Jatekos2 = jatekosok[1];
+            this.jatekTabla = jatekTabla;
+        }
+
+
+
+
+        public void VanNyertes()
+        {
+            bool IsWinner(char[,] myAmobaButtonsValues)
+            {
+                // Ellenőrizzük a sorokat
+                for (int row = 0; row < 4; row++)
+                {
+                    if (CheckRow(myAmobaButtonsValues, row))
+                        return true;
+                }
+
+                // Ellenőrizzük az oszlopokat
+                for (int col = 0; col < 4; col++)
+                {
+                    if (CheckColumn(myAmobaButtonsValues, col))
+                        return true;
+                }
+
+                // Ellenőrizzük az átlókat
+                if (CheckDiagonals(myAmobaButtonsValues))
+                    return true;
+
+                // Ha nincs győztes
+                return false;
+            }
+
+            // Sor ellenőrzése
+            bool CheckRow(char[,] myAmobaButtonsValues, int row)
+            {
+                char first = myAmobaButtonsValues[row, 0];
+                if (first == '\0')
+                    return false;
+
+                for (int col = 1; col < 4; col++)
+                {
+                    if (myAmobaButtonsValues[row, col] != first)
+                        return false;
+                }
+
+                return true;
+            }
+
+            // Oszlop ellenőrzése
+             bool CheckColumn(char[,] myAmobaButtonsValues, int col)
+            {
+                char first = myAmobaButtonsValues[0, col];
+                if (first == '\0')
+                    return false;
+
+                for (int row = 1; row < 4; row++)
+                {
+                    if (myAmobaButtonsValues[row, col] != first)
+                        return false;
+                }
+
+                return true;
+            }
+
+            // Átlók ellenőrzése
+            bool CheckDiagonals(char[,] myAmobaButtonsValues)
+            {
+                // Főátló ellenőrzése
+                char mainDiagonal = myAmobaButtonsValues[0, 0];
+                if (mainDiagonal != '\0' &&
+                    myAmobaButtonsValues[1, 1] == mainDiagonal &&
+                    myAmobaButtonsValues[2, 2] == mainDiagonal &&
+                    myAmobaButtonsValues[3, 3] == mainDiagonal)
+                {
+                    return true;
+                }
+
+                // Mellékátló ellenőrzése
+                char secondaryDiagonal = myAmobaButtonsValues[0, 3];
+                if (secondaryDiagonal != '\0' &&
+                    myAmobaButtonsValues[1, 2] == secondaryDiagonal &&
+                    myAmobaButtonsValues[2, 1] == secondaryDiagonal &&
+                    myAmobaButtonsValues[3, 0] == secondaryDiagonal)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+    }
+
+
+}
+
+namespace Amoba3_gyak
+{
+    internal class Program
+    {
+     
+        
+        static List<AmobaJatek> jatekok = new List<AmobaJatek>();
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Amoba!");
+            Console.WriteLine();
+            
+            FilenevekBeolvasasa("mindenfajl.txt");
+
+            TablakKiiratasa();
+        }
+               
+
+        private static void FilenevekBeolvasasa(string fajlnev)
+        {
+            string[]filenevek = File.ReadAllLines(fajlnev);
+
+            for (int i = 0; i < filenevek.Length; i++)
+            {
+                JatekBeolvasasa(filenevek[i]);
+            }
+        }
+
+        public static void JatekBeolvasasa(string filenev)
+        {
+           string[] nyersAdat = File.ReadAllLines(filenev);
+           string[] jatekosokSor = nyersAdat[0].Split(';');
+           string[,] tabla = new string[4, 4];
+            for (int x = 0; x < 4; x++)
+            {
+                string[] tablaSor = nyersAdat[x + 1].Split(";");
+
+                for (int i = 0; i < 4; i++)
+                {
+                    tabla[x, i] = tablaSor[i].Replace(' ', '_');
+                  
+                }
+            }
+
+            AmobaJatek amobaJatek = new AmobaJatek(jatekosokSor, tabla);
+
+            jatekok.Add(amobaJatek);
+
+            
+        }
+
+        public static void TablakKiiratasa() 
+        {
+            int index = 0;
+
+            foreach (AmobaJatek jatek in jatekok)
+            {
+                        
+                Console.WriteLine($"Játékos 1: {jatek.Jatekos1}, Játékos 2: {jatek.Jatekos2}");
+
+                for (int x = 0; x < 4; x++)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Console.Write($"{jatek.jatekTabla[x, i]} ");
+                    }
+                    Console.WriteLine();
+                }
+          
+         
+            }
+
+        }
+
+    }
